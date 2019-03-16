@@ -715,6 +715,9 @@ void RtmpOSFileSeek(RTMP_OS_FD osfd, int offset)
 
 int RtmpOSFileRead(RTMP_OS_FD osfd, char *pDataPtr, int readLen)
 {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,14,0))
+	return kernel_read(osfd, pDataPtr, readLen, &osfd->f_pos);
+#else
 	int ret;
 	mm_segment_t fs = get_fs();
 
@@ -722,11 +725,15 @@ int RtmpOSFileRead(RTMP_OS_FD osfd, char *pDataPtr, int readLen)
 	ret = vfs_read(osfd, pDataPtr, readLen, &osfd->f_pos);
 	set_fs(fs);
 	return ret;
+#endif /* LINUX_VERSION_CODE: 4.14.0 */
 }
 
 
 int RtmpOSFileWrite(RTMP_OS_FD osfd, char *pDataPtr, int writeLen)
 {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,14,0))
+	return kernel_write(osfd, pDataPtr, writeLen, &osfd->f_pos);
+#else
 	int ret;
 	mm_segment_t oldfs = get_fs();
 
@@ -734,6 +741,7 @@ int RtmpOSFileWrite(RTMP_OS_FD osfd, char *pDataPtr, int writeLen)
 	ret = vfs_write(osfd, pDataPtr, writeLen, &osfd->f_pos);
 	set_fs(oldfs);
 	return ret;
+#endif /* LINUX_VERSION_CODE: 4.14.0 */
 }
 
 
