@@ -810,9 +810,15 @@ void CFG80211OS_Scaning(void *pCB, UINT32 ChanId, UCHAR *pFrame, UINT32 FrameLen
 	}
 
 	if (!mgmt->u.probe_resp.timestamp) {
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5,0,0))
+		struct timespec64 now;
+		ktime_get_real_ts64(&now);
+		mgmt->u.probe_resp.timestamp = ((UINT64) now.tv_sec * 1000000) + now.tv_nsec / 1000;
+#else
 		struct timeval tv;
 		do_gettimeofday(&tv);
 		mgmt->u.probe_resp.timestamp = ((UINT64) tv.tv_sec * 1000000) + tv.tv_usec;
+#endif /* LINUX_VERSION_CODE: 5.0.0 */
 	}
 
 	/* inform 80211 a scan is got */
