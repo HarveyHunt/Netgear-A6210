@@ -686,7 +686,7 @@ RTMP_OS_FD RtmpOSFileOpen(char *pPath, int flag, int mode)
 		flag = O_TRUNC;
 
 	oldfs = get_fs();
-	set_fs(get_ds());
+	set_fs(KERNEL_DS);
 	filePtr = filp_open(pPath, flag, 0);
 	set_fs(oldfs);
 
